@@ -1,0 +1,89 @@
+import sqlite3
+
+# 🚀 Initialize Database & Create Tables
+def initialize_database():
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    # ✅ Create Users Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT,
+        email TEXT UNIQUE,
+        region TEXT,
+        currency TEXT
+    )
+    """)
+
+    # ✅ Create Financial Goals Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS financial_goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        goal_name TEXT,
+        target_amount REAL,
+        current_savings REAL DEFAULT 0.0,
+        deadline TEXT
+    )
+    """)
+
+    # ✅ Create User Interactions Table (for chatbot learning)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_interactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        question TEXT,
+        bot_response TEXT
+    )
+    """)
+
+    # ✅ Create Motivation Table (for mood-based quotes)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS motivational_quotes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mood_level INTEGER CHECK(mood_level BETWEEN 0 AND 5),  -- 0 = Sad, 5 = Happy
+        quote TEXT
+    )
+    """)
+
+    # ✅ Create Admins Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS admins (
+        username TEXT PRIMARY KEY  -- Admin username
+    )
+    """)
+
+    # ✅ Create Budget Tables
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS monthly_budget (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        month TEXT,  -- Format: "YYYY-MM"
+        category_type TEXT CHECK(category_type IN ('Income', 'Expense', 'Savings')),
+        category_name TEXT,
+        planned_amount REAL
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS daily_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        date TEXT,  -- Format: "YYYY-MM-DD"
+        category_type TEXT CHECK(category_type IN ('Income', 'Expense')),
+        category_name TEXT,
+        amount REAL
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+    print("Database initialized successfully!")
+
+# ✅ Run database initialization
+if __name__ == "__main__":
+    initialize_database()
+
+
