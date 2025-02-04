@@ -2,86 +2,95 @@ import sqlite3
 import bcrypt
 import os
 
-# 🚀 Connect to Database
+# ✅ Function to connect to SQLite database
 def get_db_connection():
-    db_path = os.path.join(os.getcwd(), "Process", "users.db")  # Full path to the db
+    db_path = os.path.join(os.getcwd(), "LLM-Chatbot", "Process", "users.db")  # ✅ Use the correct path
+
+    # Debugging: Print database path
+    print(f"🔍 Attempting to connect to: {db_path}")
+
     return sqlite3.connect(db_path, check_same_thread=False)
 
-# 🚀 Initialize Database
+# ✅ Debugging function for database initialization
 def init_db():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        # ✅ Ensure 'Process/' folder exists
+        db_folder = os.path.join("LLM-Chatbot", "Process")  # ✅ Corrected variable name
+        if not os.path.exists(db_folder):
+            print("⚠️ 'Process/' folder missing! Creating it now...")
+            os.makedirs(db_folder)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
-        email TEXT UNIQUE,
-        region TEXT,
-        currency TEXT
-    )
-    """)
+        db_path = os.path.join(db_folder, "users.db")
+        if not os.path.exists(db_path):
+            print("⚠️ Database file does NOT exist. It will be created now.")
+            open(db_path, "w").close()  # ✅ Create an empty database file
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS user_theme (
-        username TEXT PRIMARY KEY,
-        primary_color TEXT DEFAULT '#4CAF50',
-        background_color TEXT DEFAULT '#1E1E1E',
-        text_color TEXT DEFAULT '#FFFFFF'
-    )
-    """)
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS budget_categories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        category_type TEXT CHECK(category_type IN ('Income', 'Expense', 'Savings')),
-        category_name TEXT,
-        planned_amount REAL
-    )
-    """)
+        # ✅ Create Users Table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            email TEXT UNIQUE,
+            region TEXT,
+            currency TEXT
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        category_type TEXT CHECK(category_type IN ('Income', 'Expense')),
-        category_name TEXT,
-        amount REAL
-    )
-    """)
+        # ✅ Create Financial Goals Table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS financial_goals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            goal_name TEXT,
+            target_amount REAL,
+            current_savings REAL DEFAULT 0.0,
+            deadline TEXT
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS financial_goals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        goal_name TEXT,
-        target_amount REAL,
-        current_savings REAL DEFAULT 0.0,
-        deadline TEXT
-    )
-    """)
+        # ✅ Create User Interactions Table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_interactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            question TEXT,
+            bot_response TEXT
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS motivational_quotes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        mood_level INTEGER CHECK(mood_level BETWEEN 0 AND 5),  -- 0 = Sad, 5 = Happy
-        quote TEXT
-    )
-    """)
+        # ✅ Create Admins Table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admins (
+            username TEXT PRIMARY KEY  -- Admin username
+        )
+        """)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS user_interactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        question TEXT,
-        bot_response TEXT
-    )
-    """)
+        # ✅ Create Motivation Table (for mood-based quotes)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS motivational_quotes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mood_level INTEGER CHECK(mood_level BETWEEN 0 AND 5),  -- 0 = Sad, 5 = Happy
+            quote TEXT
+        )
+        """)
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+        print("✅ Database initialized successfully!")
+
+    except sqlite3.OperationalError as e:
+        print(f"❌ SQLite OperationalError: {e}")
+
+    except Exception as e:
+        print(f"❌ General Error: {e}")
+
+# ✅ Run database initialization
+if __name__ == "__main__":
+    init_db()
 
 # 🚀 Add User
 def add_user(username, password, email, region, currency):
