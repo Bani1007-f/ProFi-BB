@@ -9,7 +9,7 @@ import requests
 import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from Process.auth import login_user, register_user
-from Process.admin import add_quote, get_all_quotes
+
 from Process.database import init_db
 from Process.budget import update_budget, get_budget_summary
 
@@ -153,15 +153,7 @@ elif choice == "Dashboard":
     city = col2.text_input("Enter your city for weather update", value="New York")
     col2.write(get_weather(city))
 
-    # Mood-Based Motivation
-    mood = st.slider("How are you feeling today? (1-5)", 1, 5, 3)
-    category = ["Low", "Neutral", "High"][mood // 2]  # Categorizing moods
-    quotes = get_all_quotes(category)
-    
-    if quotes:
-        st.markdown(f"> *{quotes[0]}*")
-    else:
-        st.info("No quotes available.")
+   
 
     # Budget Summary
     conn = sqlite3.connect("process/.streamlit/users.db", check_same_thread=False)
@@ -232,25 +224,6 @@ elif choice == "Dashboard":
         }
     )
     st.bar_chart(df.set_index("Category"))
-
-# --- Admin Panel ---
-elif choice == "Admin Panel":
- st.title("Admin Panel - Manage Quotes")
-
-category = st.selectbox("Quote Category", ["Low", "Neutral", "High"])
-quote = st.text_area("Enter a new motivational quote")
-
-if st.button("Add Quote"):
-        add_quote(category, quote)
-        st.success("Quote added successfully!")
-
-st.subheader("Existing Quotes")
-quotes = get_all_quotes()
-if quotes:
-        for q in quotes:
-            st.write(f"- {q}")
-else:
-        st.info("No quotes available.")
 
 # --- Logout Button ---
 if "user" in st.session_state:

@@ -29,7 +29,7 @@ def add_quote(category, quote):
     conn.close()
 
 # ✅ Fetch all quotes for admin management
-def get_all_quotes():
+def get_motivational_quote():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT id, category, quote FROM motivational_quotes")
@@ -66,7 +66,7 @@ def admin_panel():
 
             # View Existing Quotes
             st.subheader("Existing Quotes")
-            quotes = get_all_quotes()
+            quotes = get_motivational_quote()
             for q_id, q_category, q_text in quotes:
                 st.write(f"📌 **Category:** {q_category}")
                 st.write(f"💬 {q_text}")
