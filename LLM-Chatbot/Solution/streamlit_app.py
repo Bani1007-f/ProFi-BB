@@ -126,8 +126,8 @@ elif choice == "Register":
     name = st.text_input("Name")
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
-    region = st.text_input("Please enter your region", type="region")
-    currency = st.text_input("Please enter your preferred Currency", type="currency")
+    region = st.text_input("Please enter your region")
+    currency = st.text_input("Please enter your preferred Currency")
 
     if st.button("Register"):
         if register_user(name, email, password, region, currency):
